@@ -280,9 +280,9 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 **Felipe Andrade**
 
-- LinkedIn: [Seu LinkedIn](https://linkedin.com/in/seu-perfil)
-- Email: seu@email.com
-- GitHub: [@seu-usuario](https://github.com/seu-usuario)
+- LinkedIn: [Felipe Andrade]([https://linkedin.com/in/seu-perfil](https://www.linkedin.com/in/felipe-andrade-0331b9205/))
+- Email: felipe.pessoall2026@gmail.com
+- GitHub: [@felipeandrade08](https://github.com/felipeandrade08)
 
 ---
 
