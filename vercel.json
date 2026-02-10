@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "public": true,
+  "buildCommand": "echo 'Build complete'",
+  "outputDirectory": ".",
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/barbearia-system.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/barbearia-system.html"
+    }
+  ]
+}
