@@ -268,6 +268,11 @@
             text-decoration: underline;
         }
 
+        /* Error Messages */
+        #loginError, #registerError {
+            display: none;
+        }
+
         /* Dashboard */
         .dashboard {
             display: grid;
@@ -1059,15 +1064,20 @@
             <h1 class="auth-title">🧔 Barbearia Pro</h1>
             <div class="form-group">
                 <label>Email</label>
-                <input type="email" id="loginEmail" placeholder="seu@email.com">
+                <input type="email" id="loginEmail" placeholder="seu@email.com" onkeypress="if(event.key==='Enter') login()">
             </div>
             <div class="form-group">
                 <label>Senha</label>
-                <input type="password" id="loginPassword" placeholder="••••••••">
+                <input type="password" id="loginPassword" placeholder="••••••••" onkeypress="if(event.key==='Enter') login()">
             </div>
             <button class="btn btn-primary" style="width: 100%;" onclick="login()">Entrar</button>
             <div class="auth-switch">
                 Não tem conta? <a onclick="showRegister()">Cadastre-se</a>
+            </div>
+            <div style="margin-top: 20px; padding: 15px; background: rgba(243, 156, 18, 0.1); border-radius: 8px; border: 1px solid rgba(243, 156, 18, 0.3); font-size: 13px; color: rgba(255,255,255,0.8);">
+                <strong>Credenciais de Teste:</strong><br>
+                📧 admin@barbearia.com<br>
+                🔑 admin123
             </div>
         </div>
 
@@ -1088,7 +1098,7 @@
             </div>
             <div class="form-group">
                 <label>Senha</label>
-                <input type="password" id="registerPassword" placeholder="••••••••">
+                <input type="password" id="registerPassword" placeholder="••••••••" onkeypress="if(event.key==='Enter') register()">
             </div>
             <button class="btn btn-primary" style="width: 100%;" onclick="register()">Cadastrar</button>
             <div class="auth-switch">
@@ -1552,16 +1562,85 @@
         function showLogin() {
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('registerScreen').classList.add('hidden');
+            clearLoginErrors();
         }
 
         function showRegister() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('registerScreen').classList.remove('hidden');
+            clearRegisterErrors();
+        }
+
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function validatePhone(phone) {
+            const phoneRegex = /^\(?\d{2}\)?\s?\d{4,5}-?\d{4}$/;
+            return phoneRegex.test(phone.replace(/\s/g, ''));
+        }
+
+        function validatePassword(password) {
+            return password.length >= 6;
+        }
+
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('loginError') || createErrorDiv('loginError', 'loginScreen');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.style.display = 'block';
+        }
+
+        function showRegisterError(message) {
+            const errorDiv = document.getElementById('registerError') || createErrorDiv('registerError', 'registerScreen');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.style.display = 'block';
+        }
+
+        function createErrorDiv(id, parentId) {
+            const div = document.createElement('div');
+            div.id = id;
+            div.style.cssText = 'background: rgba(231, 76, 60, 0.2); border: 2px solid rgba(231, 76, 60, 0.5); color: #ff6b6b; padding: 12px 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; animation: slideDown 0.3s ease;';
+            const parent = document.getElementById(parentId);
+            parent.insertBefore(div, parent.firstChild);
+            return div;
+        }
+
+        function clearLoginErrors() {
+            const errorDiv = document.getElementById('loginError');
+            if (errorDiv) errorDiv.style.display = 'none';
+        }
+
+        function clearRegisterErrors() {
+            const errorDiv = document.getElementById('registerError');
+            if (errorDiv) errorDiv.style.display = 'none';
         }
 
         function login() {
-            const email = document.getElementById('loginEmail').value;
+            clearLoginErrors();
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
+
+            // Validação
+            if (!email) {
+                showLoginError('Por favor, digite seu email');
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                showLoginError('Email inválido. Use o formato: seu@email.com');
+                return;
+            }
+
+            if (!password) {
+                showLoginError('Por favor, digite sua senha');
+                return;
+            }
+
+            if (!validatePassword(password)) {
+                showLoginError('Senha deve ter no mínimo 6 caracteres');
+                return;
+            }
 
             const user = DB.users.find(u => u.email === email && u.password === password);
 
@@ -1575,23 +1654,63 @@
                     showClientDashboard();
                 }
             } else {
-                alert('Email ou senha incorretos!');
+                showLoginError('Email ou senha incorretos');
             }
         }
 
         function register() {
-            const name = document.getElementById('registerName').value;
-            const email = document.getElementById('registerEmail').value;
-            const phone = document.getElementById('registerPhone').value;
+            clearRegisterErrors();
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const phone = document.getElementById('registerPhone').value.trim();
             const password = document.getElementById('registerPassword').value;
 
-            if (!name || !email || !phone || !password) {
-                alert('Preencha todos os campos!');
+            // Validação de nome
+            if (!name) {
+                showRegisterError('Por favor, digite seu nome completo');
+                return;
+            }
+
+            if (name.length < 3) {
+                showRegisterError('Nome deve ter no mínimo 3 caracteres');
+                return;
+            }
+
+            // Validação de email
+            if (!email) {
+                showRegisterError('Por favor, digite seu email');
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                showRegisterError('Email inválido. Use o formato: seu@email.com');
                 return;
             }
 
             if (DB.users.find(u => u.email === email)) {
-                alert('Email já cadastrado!');
+                showRegisterError('Este email já está cadastrado');
+                return;
+            }
+
+            // Validação de telefone
+            if (!phone) {
+                showRegisterError('Por favor, digite seu telefone');
+                return;
+            }
+
+            if (!validatePhone(phone)) {
+                showRegisterError('Telefone inválido. Use o formato: (11) 99999-9999');
+                return;
+            }
+
+            // Validação de senha
+            if (!password) {
+                showRegisterError('Por favor, digite uma senha');
+                return;
+            }
+
+            if (!validatePassword(password)) {
+                showRegisterError('Senha deve ter no mínimo 6 caracteres');
                 return;
             }
 
